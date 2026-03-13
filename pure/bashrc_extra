@@ -1,0 +1,11 @@
+
+# ── Claude dev environment ────────────────────────────────────────────────────
+export WORKSPACE="/workspace"
+alias ws="cd /workspace"
+alias ll="ls -lah --color=auto"
+alias grep="grep --color=auto"
+
+# Auto-attach a tmux al hacer ssh
+if [ -z "$TMUX" ] && [ -n "$SSH_CONNECTION" ]; then
+    exec tmux new-session -A -s main
+fi

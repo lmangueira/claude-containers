@@ -1,0 +1,60 @@
+services:
+  claude-antigravity:
+    build:
+      context: ./antigravity
+      dockerfile: Dockerfile
+    image: claude-antigravity:latest
+    restart: unless-stopped
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
+      - TAILSCALE_AUTHKEY=${TAILSCALE_AUTHKEY_ANTIGRAVITY}
+      - TAILSCALE_HOSTNAME=claude-antigravity
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    # No ports exposed to the host. Access exclusively via Tailscale.
+    volumes:
+      - antigravity_home:/home/claude        # ~/.antigravity-server, ~/.claude, history
+      - antigravity_workspace:/workspace
+      - tailscale_antigravity:/var/lib/tailscale
+    networks:
+      - claude_net
+      - dokploy-network
+
+  claude-pure:
+    build:
+      context: ./pure
+      dockerfile: Dockerfile
+    image: claude-pure:latest
+    restart: unless-stopped
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - SSH_PUBLIC_KEY=${SSH_PUBLIC_KEY}
+      - TAILSCALE_AUTHKEY=${TAILSCALE_AUTHKEY_PURE}
+      - TAILSCALE_HOSTNAME=claude-pure
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    volumes:
+      - pure_home:/home/claude               # history, tmux, .claude
+      - pure_workspace:/workspace
+      - tailscale_pure:/var/lib/tailscale
+    networks:
+      - claude_net
+      - dokploy-network
+
+networks:
+  claude_net:
+    driver: bridge
+    internal: false
+  dokploy-network:
+    external: true
+
+volumes:
+  antigravity_home:
+  antigravity_workspace:
+  tailscale_antigravity:
+  pure_home:
+  pure_workspace:
+  tailscale_pure:
